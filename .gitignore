@@ -15,3 +15,4 @@
 /tmp
 *.swp
 config/01_envvars.rb
+config/database.yml
