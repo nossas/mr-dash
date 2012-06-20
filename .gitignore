@@ -14,3 +14,4 @@
 /log/*.log
 /tmp
 *.swp
+config/01_envvars.rb
