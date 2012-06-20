@@ -14,5 +14,5 @@
 /log/*.log
 /tmp
 *.swp
-config/01_envvars.rb
+config/initializers/01_envvars.rb
 config/database.yml
