@@ -8,6 +8,7 @@ gem 'rails', '3.2.6'
 gem 'pg'
 gem 'httparty'
 gem 'heroku'
+gem 'mailee'
 
 # Gems used only for assets and not required
 # in production environments by default.

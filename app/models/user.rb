@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+  sync_with_mailee :name => :first_name
   attr_accessible :avatar_url, :celular, :email, :first_name, :last_name, :registered_at
   validates :email, :uniqueness => true
 
@@ -19,5 +20,9 @@ class User < ActiveRecord::Base
       break if members.empty?
       page += 1
     end
+  end
+
+  def name
+    "#{self.first_name} #{self.last_name}"
   end
 end
