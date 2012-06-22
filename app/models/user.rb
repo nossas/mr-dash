@@ -8,7 +8,13 @@ class User < ActiveRecord::Base
     last_sync = Sync.where(:name => "User.sync_with_meurio").order("created_at DESC").limit(1).first
     Sync.create :name => "User.sync_with_meurio"
     while true do
-      members = JSON.parse(HTTParty.get("http://meurio.org.br/members.json", :query => {:token => ENV["DASH_TOKEN"], :page => page, :by_updated_at => last_sync ? last_sync.created_at : ""}).body)
+      members = JSON.parse(
+        HTTParty.get("http://meurio.org.br/members.json", 
+                     :query => {:token => ENV["DASH_TOKEN"],
+                                :page => page, 
+                                :by_updated_at => last_sync ? last_sync.created_at : ""}
+                    ).body)
+
       members.each do |member|
         user = User.find_by_email(member["email"])
         puts "Syncing page ##{page} #{member['email']}"

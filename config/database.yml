@@ -5,16 +5,18 @@
 #   gem 'sqlite3'
 development:
   adapter: postgresql
-  database: mrdash
-  username: nicolasiensen
+  database: mrdash_development
+  username: runeroniek 
+  host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test: &test
   adapter: postgresql
-  database: mrdash
-  username: nicolasiensen
+  database: mrdash_test
+  username: runeroniek 
+  host: localhost
 
 cucumber:
   <<: *test
