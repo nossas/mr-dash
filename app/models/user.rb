@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
-  sync_with_mailee :name => :first_name
+  include Mailee
+
   attr_accessible :avatar_url, :celular, :email, :first_name, :last_name, :registered_at
   validates :email, :uniqueness => true
 
@@ -28,7 +29,7 @@ class User < ActiveRecord::Base
             :avatar_url => member["image_url"]
           )
         else
-          User.create(
+          user = User.create(
             :first_name => member["first_name"],
             :last_name => member["last_name"],
             :email => member["email"],
@@ -37,6 +38,7 @@ class User < ActiveRecord::Base
             :avatar_url => member["image_url"]
           )
         end
+        Contact.create(:name => user.first_name, :email => user.email, :list => "[Mr. Dash] Meu Rio")
       end
       break if members.empty?
       page += 1
