@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-  sync_with_mailee :name => :first_name, :list => "Meu Rio"
+  sync_with_mailee :name => :first_name, :list => "[Mr. Dash] Meu Rio"
   attr_accessible :avatar_url, :celular, :email, :first_name, :last_name, :registered_at
   validates :email, :uniqueness => true
 
