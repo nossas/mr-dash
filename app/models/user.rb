@@ -17,11 +17,7 @@ class User < ActiveRecord::Base
           :registered_at => member["created_at"],
           :avatar_url => member["image_url"]
         }
-        if user = User.find_by_email(options[:email])
-          user.update_attributes(options)
-        else
-          User.create(options)
-        end
+        if user = User.find_by_email(options[:email]) then user.update_attributes(options) else User.create(options) end
       end
       members = User.get_meurio_members(page += 1, last_sync ? last_sync.created_at : nil)
     end
