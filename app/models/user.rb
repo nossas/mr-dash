@@ -5,21 +5,25 @@ class User < ActiveRecord::Base
   def self.sync_with_meurio
     last_sync = Sync.where(:name => "User.sync_with_meurio").order("created_at DESC").limit(1).first
     Sync.create :name => "User.sync_with_meurio"
-    members = self.get_meurio_members(page = 1, last_sync ? last_sync.created_at : nil)
+    members = User.get_meurio_members(page = 1, last_sync ? last_sync.created_at : nil)
     while members.any? do
       members.each do |member|
-        puts "Syncing page ##{page} #{member['email']}"
-        user = User.find_or_create_by_email(
-          member["email"], 
+        if !Rails.env.test? then puts "Syncing page ##{page} #{member['email']}" end
+        options = {
           :first_name => member["first_name"],
           :last_name => member["last_name"],
           :email => member["email"],
           :celular => member["celular"],
           :registered_at => member["created_at"],
           :avatar_url => member["image_url"]
-        )
+        }
+        if user = User.find_by_email(options[:email])
+          user.update_attributes(options)
+        else
+          User.create(options)
+        end
       end
-      members = self.get_meurio_members(page += 1, last_sync ? last_sync.created_at : nil)
+      members = User.get_meurio_members(page += 1, last_sync ? last_sync.created_at : nil)
     end
   end
 
