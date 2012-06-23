@@ -4,7 +4,7 @@ rvm:
 
 before_script:
   - "cp config/database.sample.yml config/database.yml"
-  - "psql -c 'create role mrdash SUPERUSER LOGIN;' postgres"
+  - "psql -c 'create role nicolasiensen SUPERUSER LOGIN;' postgres"
   - "psql -c 'create database mrdash;' -U mrdash postgres"
   - "sh -e /etc/init.d/xvfb start"
 
