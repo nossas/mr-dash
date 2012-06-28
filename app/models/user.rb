@@ -38,6 +38,18 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.find_or_create_by_meurio_hash options
+    User.find_or_create_by_email(
+      options["email"], 
+      :first_name => options["first_name"],
+      :last_name => options["last_name"],
+      :email => options["email"],
+      :celular => options["celular"],
+      :registered_at => options["created_at"],
+      :avatar_url => options["image_url"]
+    )
+  end
+
   def name
     "#{self.first_name} #{self.last_name}"
   end
