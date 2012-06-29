@@ -61,7 +61,7 @@ describe Group do
   end
 
   describe "#sync_with_mailee" do
-    let(:user)    { mock_model(User, :email => "abcd@meurio.org.br") }
+    let(:user) { mock_model(User, :email => "abcd@meurio.org.br") }
     before { user.stub_chain(:groups, :map).and_return([1]) }
     before { subject.stub(:users).and_return([user]) }
     after { subject.sync_with_mailee }

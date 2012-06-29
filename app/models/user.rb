@@ -1,7 +1,7 @@
 class User < ActiveRecord::Base
   attr_accessible :avatar_url, :celular, :email, :first_name, :last_name, :registered_at
   validates :email, :uniqueness => true
-  has_and_belongs_to_many :groups
+  has_and_belongs_to_many :groups, :uniq => true
 
   def self.find_or_create_by_meurio_hash options
     User.find_or_create_by_email(
