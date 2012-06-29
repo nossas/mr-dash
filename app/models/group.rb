@@ -1,7 +1,23 @@
 class Group < ActiveRecord::Base
   attr_accessible :name, :uid, :user, :synced_at
-  validates :uid, :uniqueness => true
+  validates :uid, :uniqueness => true, :allow_nil => true
+  validates :name, :uniqueness => true
   has_and_belongs_to_many :users
+
+  def self.sync_with_meurio
+    page = 1
+    group = Group.find_or_create_by_name("Meu Rio")
+    time = Time.now
+    members = Mico::Member.all(:page => page, :by_updated_at => group.synced_at)
+    while members.any? do
+      members.each do |member| 
+        if !Rails.env.test? then puts "Syncing page ##{page} #{member['email']}" end
+        group.users << User.find_or_create_by_meurio_hash(member)
+      end
+      members = Mico::Member.all(:page => page += 1, :by_updated_at => group.synced_at)
+    end
+    group.update_attribute :synced_at, time
+  end
 
   def self.sync_with_meurio_issues
     Mico::Issue.all.each { |campaign| Group.find_or_create_by_uid(campaign["id"].to_s, :name => campaign["name"]) }
