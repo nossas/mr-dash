@@ -3,6 +3,7 @@ class Group < ActiveRecord::Base
   validates :uid, :uniqueness => true, :allow_nil => true
   validates :name, :uniqueness => true
   has_and_belongs_to_many :users
+  before_create :create_mailee_list
 
   def self.sync_with_meurio
     page = 1
@@ -23,6 +24,10 @@ class Group < ActiveRecord::Base
     Mico::Issue.all.each { |campaign| Group.find_or_create_by_uid(campaign["id"].to_s, :name => campaign["name"]) }
   end
 
+  def create_mailee_list
+     self.mailee_id = (Mailee::List.find(:all).select{|l| l.name == "[Mr. Dash] #{self.name}"}.first || Mailee::List.create(:name => "[Mr. Dash] #{self.name}")).id
+  end
+
   def sync_with_meurio_members
     page = 1
     time = Time.now
@@ -38,5 +43,9 @@ class Group < ActiveRecord::Base
   end
 
   def sync_with_mailee
+    self.users.each do |user|
+      if !Rails.env.test? then puts "Syncing #{user.email}" end
+      Mailee::Contact.create(:email => user.email, :name => user.first_name, :list_ids => user.groups.map{|g| g.mailee_id})
+    end
   end
 end

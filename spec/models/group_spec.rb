@@ -9,6 +9,8 @@ describe Group do
   let(:issue2)  { {"id" => 2, "name" => "Poder e autoridade em favelas com UPP"} }
   let(:time)    { Time.parse("2012-06-28 14:58:34 -0300") }
   before { Time.stub(:now).and_return(time) }
+  before { Mailee::List.stub(:find).and_return([]) }
+  before { Mailee::List.stub(:create).and_return(mock(Object, :id => 1)) }
 
   describe ".sync_with_meurio" do
     let(:group) { mock_model(Group) }
@@ -56,5 +58,13 @@ describe Group do
       before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 3).and_return([]) }
       it("should find or create each member of each signature of each page") { User.should_receive(:find_or_create_by_meurio_hash).exactly(4).times.and_return(user) }
     end
+  end
+
+  describe "#sync_with_mailee" do
+    let(:user)    { mock_model(User, :email => "abcd@meurio.org.br") }
+    before { user.stub_chain(:groups, :map).and_return([1]) }
+    before { subject.stub(:users).and_return([user]) }
+    after { subject.sync_with_mailee }
+    it("should subscribe each user to the respective Mailee list") { Mailee::Contact.should_receive(:create) }
   end
 end
