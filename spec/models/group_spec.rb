@@ -58,6 +58,10 @@ describe Group do
       before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 3).and_return([]) }
       it("should find or create each member of each signature of each page") { User.should_receive(:find_or_create_by_meurio_hash).exactly(4).times.and_return(user) }
     end
+    context "when it's not a Meu Rio group" do
+      before { subject.stub(:uid).and_return(nil) }
+      it("should not request the Meu Rio signatures") { Mico::PetitionSignature.should_not_receive(:find_all_by_issue_id) }
+    end
   end
 
   describe "#sync_with_mailee" do

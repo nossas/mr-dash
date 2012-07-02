@@ -26,17 +26,19 @@ class Group < ActiveRecord::Base
   end
 
   def sync_with_meurio_members
-    page = 1
-    time = Time.now
-    signatures = Mico::PetitionSignature.find_all_by_issue_id(self.uid, :by_updated_at => self.synced_at, :page => page)
-    while signatures.any? do
-      signatures.each do |signature|
-        if !Rails.env.test? then puts "Syncing page ##{page} #{signature['member']['email']}" end
-        self.users << User.find_or_create_by_meurio_hash(signature["member"])
+    if self.uid
+      page = 1
+      time = Time.now
+      signatures = Mico::PetitionSignature.find_all_by_issue_id(self.uid, :by_updated_at => self.synced_at, :page => page)
+      while signatures.any? do
+        signatures.each do |signature|
+          if !Rails.env.test? then puts "Syncing page ##{page} #{signature['member']['email']}" end
+          self.users << User.find_or_create_by_meurio_hash(signature["member"])
+        end
+        signatures = Mico::PetitionSignature.find_all_by_issue_id(self.uid, :by_updated_at => self.synced_at, :page => page += 1)
       end
-      signatures = Mico::PetitionSignature.find_all_by_issue_id(self.uid, :by_updated_at => self.synced_at, :page => page += 1)
+      self.update_attribute :synced_at, time
     end
-    self.update_attribute :synced_at, time
   end
 
   def sync_with_mailee
