@@ -3,6 +3,7 @@ class Group < ActiveRecord::Base
   validates :uid, :uniqueness => true, :allow_nil => true
   validates :name, :uniqueness => true
   has_and_belongs_to_many :users, :uniq => true
+  has_many :groups_users
   before_create :create_mailee_list
 
   def self.sync_with_meurio
@@ -39,14 +40,7 @@ class Group < ActiveRecord::Base
   end
 
   def sync_with_mailee
-    self.users.each do |user|
-      if !Rails.env.test? then puts "Syncing #{user.email}" end
-      begin
-        Mailee::Contact.create(:email => user.email, :name => user.first_name, :list_ids => user.groups.map{|g| g.mailee_id})
-      rescue
-        puts "Error syncing #{user.email}"
-      end
-    end
+    self.groups_users.where(:synced_with_mailee => nil).each {|gu| gu.sync_with_mailee }
   end
   
   private

@@ -61,10 +61,9 @@ describe Group do
   end
 
   describe "#sync_with_mailee" do
-    let(:user) { mock_model(User, :email => "abcd@meurio.org.br") }
-    before { user.stub_chain(:groups, :map).and_return([1]) }
-    before { subject.stub(:users).and_return([user]) }
+    let(:groups_user){ mock_model(GroupsUser) }
+    before { subject.stub_chain(:groups_users, :where).and_return([groups_user]) }
     after { subject.sync_with_mailee }
-    it("should subscribe each user to the respective Mailee list") { Mailee::Contact.should_receive(:create) }
+    it("should subscribe each user to the respective Mailee list") { groups_user.should_receive(:sync_with_mailee) }
   end
 end
