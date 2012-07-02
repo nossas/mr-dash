@@ -8,6 +8,7 @@ gem 'heroku'
 gem 'mailee'
 gem 'jquery-rails'
 gem 'mico'
+gem 'arara'
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
