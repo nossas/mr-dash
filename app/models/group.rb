@@ -27,10 +27,12 @@ class Group < ActiveRecord::Base
   end
 
   def sync_with_provider
-    if self.provider.name == "Meu Rio"
-      self.sync_with_meurio
-    elsif self.provider.name == "VoC"
-      self.sync_with_voc
+    if self.provider
+      if self.provider.name == "Meu Rio"
+        self.sync_with_meurio
+      elsif self.provider.name == "VoC"
+        self.sync_with_voc
+      end
     end
   end
 
