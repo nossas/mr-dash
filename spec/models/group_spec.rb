@@ -40,12 +40,50 @@ describe Group do
     it("should create a group for each campaign") { expect { Group.sync_with_meurio_issues }.to change{ Group.count }.by(2) }
   end
 
-  describe "#sync_with_meurio_members" do
+  describe "#sync_with_provider" do
+    after { subject.sync_with_provider }
+    context "when it's a Meu Rio group" do
+      before { subject.stub(:provider).and_return(mock_model(Provider, :name => "Meu Rio")) }
+      it("should sync with Meu Rio") { subject.should_receive(:sync_with_meurio) }
+    end
+    context "when it's a VoC group" do
+      before { subject.stub(:provider).and_return(mock_model(Provider, :name => "VoC")) }
+      it("should sync with VoC") { subject.should_receive(:sync_with_voc) }
+    end
+  end
+
+  describe "#sync_with_voc" do
+    let(:question1) { {"user_info" => {"email" => "abcd@meurio.org.br"}} }
+    let(:question2) { {"user_info" => {"email" => "abcd2@meurio.org.br"}} }
+    let(:question3) { {"user_info" => {"email" => "abcd3@meurio.org.br"}} }
+    let(:question4) { {"user_info" => {"email" => "abcd4@meurio.org.br"}} }
+    let(:users) { mock(Object) }
+    before { users.stub(:<<) }
+    before { subject.stub(:uid).and_return("1") }
+    before { subject.stub(:users).and_return(users) }
+    before { Arara::Question.stub(:find_all_by_category_id).with("1", :by_updated_at => nil, :page => 1).and_return([question1, question2]) }
+    before { Arara::Question.stub(:find_all_by_category_id).with("1", :by_updated_at => nil, :page => 2).and_return([]) }
+    after { subject.send(:sync_with_voc) }
+    it("should find or create each member of each question") { User.should_receive(:find_or_create_by_voc_hash).twice }
+    it("should create a relation between the group and the user") { users.should_receive(:<<).twice }
+    it("should update the synced_at group's attribute") { subject.should_receive(:update_attribute).with(:synced_at, time) }
+    context "when the group have been synced before" do
+      before { subject.stub(:synced_at).and_return(time) }
+      it("should filter questions since last sync") { Arara::Question.should_receive(:find_all_by_category_id).with("1", :by_updated_at => time, :page => 1) }
+    end
+    context "when there is two pages of questions" do
+      before { Arara::Question.stub(:find_all_by_category_id).with("1", :by_updated_at => nil, :page => 2).and_return([question3, question4]) }
+      before { Arara::Question.stub(:find_all_by_category_id).with("1", :by_updated_at => nil, :page => 3).and_return([]) }
+      it("should find or create each member of each question of each page") { User.should_receive(:find_or_create_by_voc_hash).exactly(4).times }
+    end
+  end
+
+  describe "#sync_with_meurio" do
     let(:user){ mock_model(User) }
     before { subject.stub(:uid).and_return(1) }
     before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 1).and_return([member1, member2]) }
     before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 2).and_return([]) }
-    after { subject.sync_with_meurio_members }
+    after { subject.send(:sync_with_meurio) }
     it("should find or create each member of each signature") { User.should_receive(:find_or_create_by_meurio_hash).twice.and_return(user) }
     it("should create a relation between the group and the user") { User.stub(:find_or_create_by_meurio_hash).and_return(user) }
     it("should update the synced_at group's attribute") { subject.should_receive(:update_attribute).with(:synced_at, time) }
@@ -57,10 +95,6 @@ describe Group do
       before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 2).and_return([member3, member4]) }
       before { Mico::PetitionSignature.stub(:find_all_by_issue_id).with(1, :by_updated_at => subject.synced_at, :page => 3).and_return([]) }
       it("should find or create each member of each signature of each page") { User.should_receive(:find_or_create_by_meurio_hash).exactly(4).times.and_return(user) }
-    end
-    context "when it's not a Meu Rio group" do
-      before { subject.stub(:uid).and_return(nil) }
-      it("should not request the Meu Rio signatures") { Mico::PetitionSignature.should_not_receive(:find_all_by_issue_id) }
     end
   end
 

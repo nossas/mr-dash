@@ -15,6 +15,16 @@ class User < ActiveRecord::Base
     )
   end
 
+  def self.find_or_create_by_voc_hash options
+    User.find_or_create_by_email(
+      options["email"], 
+      :first_name => options["name"],
+      :email => options["email"],
+      :registered_at => options["created_at"],
+      :avatar_url => options["picture"]
+    )
+  end
+
   def name
     "#{self.first_name} #{self.last_name}"
   end
